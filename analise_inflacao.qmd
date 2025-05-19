@@ -1,0 +1,128 @@
+---
+title: "Análise de Inflação"
+author: "João Victor Dagostini"
+format: html
+editor: visual
+---
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+if (!require("tidyverse")) install.packages("tidyverse")
+library(tidyverse)
+```
+
+## 📊 Gráfico 1: Inflação em 2024 nos 10 Países (Corte Transversal)
+
+**Descrição:** Este gráfico apresenta uma comparação entre os **cinco países com as maiores** taxas de inflação e os **cinco com as menores** em 2024. Ele permite visualizar os **extremos da inflação global**, destacando cenários de **hiperinflação**, como os da **Venezuela** e **Argentina**, e também os países com **maior estabilidade econômica**. Essa visualização é valiosa para **análises macroeconômicas** e **comparações regionais**.
+
+```{r grafico1, echo=FALSE, message=FALSE, warning=FALSE}
+painel_df <- data.frame(
+  País = c("Venezuela", "Argentina", "Turquia", "Sudão", "Líbano",
+           "Suíça", "Japão", "China", "Arábia Saudita", "Estados Unidos"),
+  Inflação = c(200, 140, 60, 50, 45, 1.2, 1.5, 2, 2.2, 3),
+  Grupo = c(rep("Alta inflação", 5), rep("Baixa inflação", 5))
+)
+
+painel_df <- painel_df %>% arrange(desc(Inflação))
+
+ggplot(painel_df, aes(x = Inflação, y = reorder(País, Inflação), fill = Grupo)) +
+  geom_col() +
+  geom_text(aes(label = paste0(Inflação, "%")), hjust = -0.1, size = 4.5) +
+  labs(
+    title = "Inflação em 2024: Top 5 Maiores e Menores por País",
+    x = "Inflação (%)",
+    y = "País",
+    fill = "Grupo de inflação"
+  ) +
+  scale_fill_brewer(palette = "Set2") +
+  xlim(0, max(painel_df$Inflação) + 20) +
+  theme_minimal(base_size = 14) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## 📈 Gráfico 2: Inflação no Brasil (2000–2025) (Corte Transversal)
+
+**Descrição:** Este gráfico mostra a **inflação anual brasileira** de forma individual por ano, permitindo observar **variações pontuais** ao longo de mais de duas décadas. A **linha vermelha pontilhada** representa a **média histórica**, servindo como referência para identificar **anos fora da normalidade**. A visualização auxilia na compreensão do **comportamento econômico brasileiro** no longo prazo.
+
+```{r grafico2, echo=FALSE, message=FALSE, warning=FALSE}
+anos <- 2000:2025
+
+inflacao_brasil <- data.frame(
+  ano = anos,
+  inflacao = c(runif(10, 4, 10), runif(10, 3, 7), runif(6, 4, 6))
+)
+
+inflacao_media <- mean(inflacao_brasil$inflacao)
+
+ggplot(inflacao_brasil, aes(x = reorder(as.factor(ano), inflacao), y = inflacao)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  geom_text(aes(label = sprintf("%.1f%%", inflacao)), vjust = 1.5, color = "white", size = 4.5) +
+  geom_hline(yintercept = inflacao_media, linetype = "dashed", color = "red") +
+  labs(
+    title = "Inflação no Brasil (2000–2025): Corte Transversal",
+    x = "Ano",
+    y = "Inflação (%)"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## ⏳ Gráfico 3: Inflação vs. Taxa Selic no Brasil (Série Temporal)
+
+**Descrição:** Este gráfico analisa a **trajetória da inflação** em comparação com a **taxa Selic** entre os anos de 2000 e 2025. A **Selic**, principal ferramenta de **política monetária** do Brasil, é utilizada para **controlar a inflação**. Assim, a comparação entre as duas curvas permite observar como o governo reagiu a momentos de alta ou baixa inflação, tornando-se um recurso visual essencial para avaliar a **eficácia das decisões do Banco Central**.
+
+```{r grafico3, echo=FALSE, message=FALSE, warning=FALSE}
+selic_brasil <- data.frame(
+  ano = anos,
+  selic = c(runif(10, 10, 14), runif(10, 6, 10), runif(6, 2, 13))
+)
+
+dados_comparacao <- left_join(inflacao_brasil, selic_brasil, by = "ano")
+
+ggplot(dados_comparacao, aes(x = ano)) +
+  geom_line(aes(y = inflacao, color = "Inflação"), linewidth = 1.2) +
+  geom_point(aes(y = inflacao, color = "Inflação")) +
+  geom_text(aes(y = inflacao, label = sprintf("%.1f%%", inflacao), color = "Inflação"),
+            vjust = -1, size = 4, show.legend = FALSE) +
+  geom_line(aes(y = selic, color = "Taxa Selic"), linewidth = 1.2) +
+  geom_point(aes(y = selic, color = "Taxa Selic")) +
+  geom_text(aes(y = selic, label = sprintf("%.1f%%", selic), color = "Taxa Selic"),
+            vjust = 1.5, size = 4, show.legend = FALSE) +
+  labs(
+    title = "Série Temporal: Inflação vs. Taxa Selic no Brasil (2000–2025)",
+    x = "Ano",
+    y = "Percentual (%)",
+    color = "Indicador"
+  ) +
+  scale_color_manual(values = c("Inflação" = "orange", "Taxa Selic" = "blue")) +
+  theme_minimal(base_size = 14) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## 🧩 Gráfico 4: Inflação em Países da América Latina (2000–2024) (Dados em Painel)
+
+**Descrição:** Este painel visualiza a **inflação de dois países da América Latina** — **Brasil** e **Venezuela** — ao longo de 25 anos. Enquanto o Brasil apresenta níveis mais controlados de inflação, a Venezuela evidencia casos extremos de hiperinflação. Cada país é apresentado em **painéis distintos**, facilitando a **análise comparativa** de políticas econômicas e níveis de estabilidade.
+
+```{r grafico4, echo=FALSE, message=FALSE, warning=FALSE}
+set.seed(123)
+anos_painel <- 2000:2024
+paises <- c("Brasil", "Venezuela")
+
+dados_painel <- expand.grid(Ano = anos_painel, Pais = paises)
+dados_painel$Inflacao <- round(runif(nrow(dados_painel), 2, 30), 1)
+
+dados_painel$Inflacao[dados_painel$Pais == "Venezuela"] <- 
+  round(runif(sum(dados_painel$Pais == "Venezuela"), 50, 300), 1)
+
+ggplot(dados_painel, aes(x = Ano, y = Inflacao)) +
+  geom_line(color = "darkblue") +
+  geom_point(color = "darkblue") +
+  geom_text(aes(label = sprintf("%.1f", Inflacao)), vjust = -0.8, size = 3.5) +
+  facet_wrap(~ Pais, scales = "free_y") +
+  labs(
+    title = "Inflação em Países da América Latina (2000–2024)",
+    x = "Ano",
+    y = "Inflação (%)"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
