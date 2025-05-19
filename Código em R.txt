@@ -1,0 +1,101 @@
+# Instala e carrega o pacote tidyverse, que inclui ggplot2, dplyr, etc.
+if (!require("tidyverse")) install.packages("tidyverse")
+library(tidyverse)
+
+# ────────────────────────────────────────────────
+# 📊 GRÁFICO 1: Corte Transversal - Inflação em 2024 nos 10 países
+# Compara 5 países com maior e 5 com menor inflação no ano de 2024.
+# As barras são coloridas por grupo e os valores são mostrados ao lado de cada barra.
+# ────────────────────────────────────────────────
+painel_df <- data.frame(
+  País = c("Venezuela", "Argentina", "Turquia", "Sudão", "Líbano",
+           "Suíça", "Japão", "China", "Arábia Saudita", "Estados Unidos"),
+  Inflação = c(200, 140, 60, 50, 45, 1.2, 1.5, 2, 2.2, 3),
+  Grupo = c(rep("Alta inflação", 5), rep("Baixa inflação", 5))
+)
+
+# Ordena os dados pela inflação para facilitar a leitura no gráfico
+painel_df <- painel_df %>% arrange(desc(Inflação))
+
+# Gráfico de barras horizontais com valores escritos
+ggplot(painel_df, aes(x = Inflação, y = reorder(País, Inflação), fill = Grupo)) +
+  geom_col() +
+  geom_text(aes(label = paste0(Inflação, "%")), hjust = -0.1, size = 3.5) +
+  labs(title = "Inflação em 2024: Top 5 Maiores e Menores por País",
+       x = "Inflação (%)", y = "País") +
+  scale_fill_brewer(palette = "Set2") +
+  xlim(0, max(painel_df$Inflação) + 20) +
+  theme_minimal()
+
+# ────────────────────────────────────────────────
+# 📈 GRÁFICO 2: Corte Transversal - Inflação no Brasil desde 2000
+# Mostra a inflação ano a ano no Brasil, com linha da média histórica.
+# ────────────────────────────────────────────────
+anos <- 2000:2025
+
+# Simula dados de inflação realistas para o Brasil
+inflacao_brasil <- data.frame(
+  ano = anos,
+  inflacao = c(runif(10, 4, 10), runif(10, 3, 7), runif(6, 4, 6))
+)
+
+# Calcula a média para referenciar no gráfico
+inflacao_media <- mean(inflacao_brasil$inflacao)
+
+# Gráfico de barras por ano com linha de média
+ggplot(inflacao_brasil, aes(x = reorder(as.factor(ano), inflacao), y = inflacao)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  geom_hline(yintercept = inflacao_media, linetype = "dashed", color = "red") +
+  labs(title = "Inflação no Brasil (2000–2025): Corte Transversal",
+       x = "Ano", y = "Inflação (%)") +
+  theme_minimal()
+
+# ────────────────────────────────────────────────
+# ⏳ GRÁFICO 3: Série Temporal - Inflação vs. Selic no Brasil (2000–2025)
+# Compara a trajetória da inflação com a taxa de juros básica (Selic).
+# ────────────────────────────────────────────────
+
+# Simula dados para a taxa Selic no mesmo período
+selic_brasil <- data.frame(
+  ano = anos,
+  selic = c(runif(10, 10, 14), runif(10, 6, 10), runif(6, 2, 13))
+)
+
+# Junta os dados de inflação e selic por ano
+dados_comparacao <- left_join(inflacao_brasil, selic_brasil, by = "ano")
+
+# Cria a série temporal com linhas separadas para inflação e Selic
+ggplot(dados_comparacao, aes(x = ano)) +
+  geom_line(aes(y = inflacao, color = "Inflação"), size = 1.2) +
+  geom_line(aes(y = selic, color = "Taxa Selic"), size = 1.2) +
+  labs(title = "Série Temporal: Inflação vs. Taxa Selic no Brasil (2000–2025)",
+       x = "Ano", y = "Percentual (%)") +
+  scale_color_manual(values = c("Inflação" = "orange", "Taxa Selic" = "blue")) +
+  theme_minimal()
+
+# ────────────────────────────────────────────────
+# 🧩 GRÁFICO 4: Dados em Painel - Inflação em Países da América Latina
+# Visualiza a inflação de múltiplos países ao longo do tempo.
+# Cada país tem seu próprio painel (facet_wrap).
+# ────────────────────────────────────────────────
+set.seed(123)
+anos_painel <- 2000:2024
+paises <- c("Brasil", "Argentina", "Chile", "Peru", "Colômbia", "Venezuela")
+
+# Cria grade de país × ano
+dados_painel <- expand.grid(Ano = anos_painel, Pais = paises)
+
+# Simula inflação aleatória entre 2% e 30%
+dados_painel$Inflacao <- round(runif(nrow(dados_painel), 2, 30), 1)
+
+# Venezuela recebe inflação mais alta (simulando hiperinflação)
+dados_painel$Inflacao[dados_painel$Pais == "Venezuela"] <- 
+  round(runif(sum(dados_painel$Pais == "Venezuela"), 50, 300), 1)
+
+# Gráfico com painéis separados para cada país
+ggplot(dados_painel, aes(x = Ano, y = Inflacao)) +
+  geom_line(color = "darkblue") +
+  facet_wrap(~ Pais, scales = "free_y") +
+  labs(title = "Inflação em Países da América Latina (2000–2024)",
+       x = "Ano", y = "Inflação (%)") +
+  theme_minimal()
