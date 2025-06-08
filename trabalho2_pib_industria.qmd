@@ -1,0 +1,38 @@
+---
+title: "Evolução do PIB da Indústria Brasileira"
+format: html
+editor: visual
+execute:
+  freeze: auto
+  echo: true
+---
+
+## Introdução
+
+Este relatório apresenta a variação anual real do Produto Interno Bruto (PIB) da Indústria no Brasil, com base nos dados oficiais disponibilizados pelo Banco Central do Brasil (código da série: 7328). A série cobre dados a partir de 1996 e reflete o desempenho do setor industrial ao longo do tempo, incluindo os impactos de diferentes crises econômicas, períodos de crescimento e recuperação.
+
+## Fonte dos Dados
+
+Os dados foram obtidos por meio do pacote `GetBCBData`, que acessa diretamente o Sistema Gerenciador de Séries Temporais (SGS) do Banco Central. A série 7328 refere-se ao PIB da Indústria em variação percentual real no acumulado do ano.
+
+## Gráfico da Variação Anual do PIB da Indústria
+
+A animação a seguir foi gerada previamente com o script `gerar_gif_pib_industria.R`. Ela mostra a evolução da taxa de variação real anual do PIB da Indústria no Brasil, com destaque visual em cada ponto de dados e seus valores percentuais.
+
+```{r}
+knitr::include_graphics("pib_industria.gif")
+```
+
+## Análise
+
+Observa-se que o setor industrial brasileiro passa por fortes oscilações ao longo das décadas. Momentos de crescimento sustentado alternam-se com quedas acentuadas, especialmente em períodos de crise econômica como:
+
+-   **Crise de 2008**: redução acentuada da produção industrial.
+-   **Recessão de 2015–2016**: impactos significativos no setor.
+-   **Pandemia de COVID-19 (2020)**: queda abrupta seguida de recuperação.
+
+O comportamento cíclico da indústria revela sua sensibilidade às condições macroeconômicas e políticas econômicas adotadas no país.
+
+## Conclusão
+
+A visualização permite compreender melhor o desempenho da indústria brasileira ao longo do tempo e serve como subsídio para análises econômicas e elaboração de políticas públicas.
